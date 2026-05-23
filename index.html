@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🎴 Java面试闪卡 | 左滑不会·右滑已掌握</title>
+<meta name="description" content="Tinder风格Java面试备考工具——左滑标记不会，右滑确认掌握。上千道真实面试题，游戏化学面试，分享你的战绩！">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0f172a;color:#e2e8f0;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:20px}
+.top{text-align:center;margin:20px 0}
+.top h1{font-size:1.5em;color:#38bdf8}.top p{color:#94a3b8;font-size:.9em;margin-top:8px}
+.card-container{width:100%;max-width:380px;height:460px;position:relative;margin:20px auto}
+.card{position:absolute;width:100%;height:100%;background:linear-gradient(145deg,#1e293b,#0f172a);border-radius:20px;border:2px solid #334155;padding:30px;display:flex;flex-direction:column;justify-content:center;align-items:center;transition:transform .4s,opacity .4s;cursor:grab;user-select:none}
+.card:active{cursor:grabbing}
+.card .category{color:#facc15;font-size:.8em;margin-bottom:12px;background:rgba(250,204,21,.1);padding:4px 12px;border-radius:12px}
+.card .question{font-size:1.15em;text-align:center;line-height:1.7;margin:10px 0}
+.card .hint{color:#64748b;font-size:.8em;margin-top:15px;font-style:italic}
+.card.swipe-left{transform:translateX(-120%) rotate(-20deg);opacity:0}
+.card.swipe-right{transform:translateX(120%) rotate(20deg);opacity:0}
+.buttons{display:flex;gap:20px;justify-content:center;margin:20px 0}
+.btn{width:60px;height:60px;border-radius:50%;border:none;font-size:1.5em;cursor:pointer;transition:all .2s}
+.btn-no{background:#7f1d1d;color:#fca5a5}.btn-no:hover{background:#991b1b;transform:scale(1.1)}
+.btn-yes{background:#14532d;color:#86efac}.btn-yes:hover{background:#166534;transform:scale(1.1)}
+.stats{display:flex;gap:20px;justify-content:center;margin:20px 0}
+.stat{text-align:center}.stat .num{font-size:1.8em;font-weight:bold}.stat .label{font-size:.75em;color:#94a3b8}
+.stat.green .num{color:#4ade80}.stat.red .num{color:#f87171}.stat.blue .num{color:#38bdf8}
+.share{background:linear-gradient(135deg,#38bdf8,#818cf8);color:#fff;border:none;padding:10px 30px;border-radius:25px;font-size:1em;cursor:pointer;margin:10px 0}
+.donate{text-align:center;margin:30px 0;padding:20px;background:#1e293b;border-radius:16px}
+.donate img{width:160px;border-radius:12px}
+.donate p{color:#facc15;margin-bottom:8px}
+.nav{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin:20px 0}
+.nav a{background:#1e293b;color:#94a3b8;padding:6px 14px;border-radius:20px;text-decoration:none;font-size:.85em}
+.nav a:hover{background:#38bdf8;color:#0f172a}
+</style>
+</head>
+<body>
+<div class="top">
+<h1>🎴 Java面试闪卡</h1>
+<p>左滑「不会」| 右滑「已掌握」| 游戏化备考</p>
+</div>
+
+<div class="stats">
+<div class="stat green"><div class="num" id="mastered">0</div><div class="label">✅ 已掌握</div></div>
+<div class="stat red"><div class="num" id="review">0</div><div class="label">📝 待复习</div></div>
+<div class="stat blue"><div class="num" id="total">30</div><div class="label">📊 总题量</div></div>
+</div>
+
+<div class="card-container">
+<div class="card" id="card">
+<div class="category" id="category">Java基础</div>
+<div class="question" id="question">HashMap的底层数据结构是什么？</div>
+<div class="hint">💡 点击左右按钮或滑动卡片</div>
+</div>
+</div>
+
+<div class="buttons">
+<button class="btn btn-no" onclick="swipe('left')" title="不会">✕</button>
+<button class="btn btn-yes" onclick="swipe('right')" title="掌握">✓</button>
+</div>
+
+<button class="share" onclick="shareResult()">📤 分享我的战绩</button>
+
+<div class="donate">
+<p>☕ 帮到你了？请喝杯咖啡</p>
+<img src="qrcode.png" alt="赞赏码">
+<p style="color:#64748b;font-size:.75em">扫码赞赏 · 解锁全部题库</p>
+</div>
+
+<div class="nav">
+<a href="https://Abyte-zym.github.io/arsenal/">🎯 弹药库</a>
+<a href="https://Abyte-zym.github.io/arsenal/shop.html">🛒 装备商店</a>
+<a href="https://Abyte-zym.github.io/interview-quiz/">☕ 题库</a>
+</div>
+
+<script>
+const questions = [
+{cat:"Java基础",q:"HashMap的底层数据结构是什么？"},
+{cat:"Java基础",q:"== 和 equals() 有什么区别？"},
+{cat:"Java基础",q:"String为什么是不可变的？"},
+{cat:"Java并发",q:"synchronized和Lock有什么区别？"},
+{cat:"Java并发",q:"volatile关键字的作用是什么？"},
+{cat:"Java并发",q:"线程池的核心参数有哪些？"},
+{cat:"JVM",q:"JVM内存区域分为哪些部分？"},
+{cat:"JVM",q:"垃圾回收算法有哪些？"},
+{cat:"JVM",q:"CMS和G1收集器的区别？"},
+{cat:"Spring",q:"Spring Bean的生命周期？"},
+{cat:"Spring",q:"@Transactional失效的场景有哪些？"},
+{cat:"Spring",q:"Spring Boot自动配置原理？"},
+{cat:"MySQL",q:"MySQL索引失效的场景有哪些？"},
+{cat:"MySQL",q:"B+树索引和Hash索引区别？"},
+{cat:"MySQL",q:"事务隔离级别有哪些？"},
+{cat:"Redis",q:"缓存穿透、击穿、雪崩区别？"},
+{cat:"Redis",q:"Redis持久化方式有哪些？"},
+{cat:"Redis",q:"分布式锁怎么用Redis实现？"},
+{cat:"微服务",q:"CAP理论是什么？"},
+{cat:"微服务",q:"Sentinel限流模式有哪几种？"},
+{cat:"微服务",q:"RocketMQ怎么保证消息不丢？"},
+{cat:"算法",q:"快排的时间复杂度？最坏情况？"},
+{cat:"算法",q:"LRU缓存怎么实现？"},
+{cat:"算法",q:"反转链表的思路？"},
+{cat:"AI",q:"RAG的核心流程是什么？"},
+{cat:"AI",q:"Agent核心公式是什么？"},
+{cat:"AI",q:"向量数据库的作用？"},
+{cat:"Netty",q:"Reactor模式是什么？"},
+{cat:"Netty",q:"零拷贝原理？"},
+{cat:"设计模式",q:"单例模式的几种写法？"}
+];
+let current = 0, mastered = 0, review = 0;
+let order = [...Array(questions.length).keys()];
+order.sort(() => Math.random() - 0.5);
+
+function showCard() {
+if(current >= order.length) {
+document.getElementById('question').textContent = '🎉 全部完成！';
+document.getElementById('category').textContent = '恭喜';
+return;
+}
+const q = questions[order[current]];
+document.getElementById('category').textContent = q.cat;
+document.getElementById('question').textContent = q.q;
+document.getElementById('card').className = 'card';
+document.getElementById('total').textContent = questions.length - current;
+}
+
+function swipe(dir) {
+if(current >= order.length) return;
+const card = document.getElementById('card');
+if(dir === 'right') {
+card.className = 'card swipe-right';
+mastered++;
+document.getElementById('mastered').textContent = mastered;
+} else {
+card.className = 'card swipe-left';
+review++;
+document.getElementById('review').textContent = review;
+}
+current++;
+setTimeout(showCard, 400);
+}
+
+function shareResult() {
+const totalQ = mastered + review;
+const pct = totalQ > 0 ? Math.round(mastered/totalQ*100) : 0;
+const grade = pct >= 80 ? '🏆 王者' : pct >= 60 ? '⭐ 钻石' : pct >= 40 ? '🔧 青铜' : '🌱 萌新';
+const text = `🎴 Java面试闪卡战绩\n✅ 掌握${mastered}题 | 📝 待复习${review}题\n📊 掌握率 ${pct}% — ${grade}\n\n来测测你的水平 👇\nhttps://Abyte-zym.github.io/java-interview-swipe/`;
+navigator.clipboard?.writeText(text).then(() => alert('已复制！去朋友圈/群里分享吧'));
+}
+
+// Touch support
+let startX = 0;
+document.getElementById('card').addEventListener('touchstart', e => { startX = e.touches[0].clientX; });
+document.getElementById('card').addEventListener('touchend', e => {
+const diff = e.changedTouches[0].clientX - startX;
+if(Math.abs(diff) > 60) swipe(diff > 0 ? 'right' : 'left');
+});
+
+document.addEventListener('keydown', e => {
+if(e.key === 'ArrowLeft') swipe('left');
+if(e.key === 'ArrowRight') swipe('right');
+});
+
+showCard();
+</script>
+</body>
+</html>
